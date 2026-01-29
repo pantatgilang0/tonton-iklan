@@ -44,7 +44,7 @@
         document.getElementById('saldo').innerText = saldo.toLocaleString();
 
         function tontonVideo() {
-            window.open('https://www.effectivegatecpm.com/sxy78czxp?key=ecbe68cdf04e2a8a22c5f0f6403f198c', '_blank');
+            location.assign('https://www.effectivegatecpm.com/sxy78czxp?key=ecbe68cdf04e2a8a22c5f0f6403f198c');
             saldo += 500;
             localStorage.setItem('saldo_user', saldo);
             document.getElementById('saldo').innerText = saldo.toLocaleString();
@@ -62,7 +62,6 @@
         }
 
         setInterval(function() {
-            console.log("Menjalankan iklan otomatis...");
             tontonVideo(); 
         }, 45000);
     </script>
