@@ -3,144 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP CUAN AUTOPILOT</title>
+    <title>Tonton Iklan Dapat Cuan</title>
     <style>
-        :root { --primary: #00ff88; --dark: #0f0f0f; --card: #1a1a1a; }
-        body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header { background: var(--primary); width: 100%; padding: 25px; text-align: center; color: black; font-weight: 900; }
-        .saldo-box { font-size: 35px; }
-        .container { width: 92%; max-width: 450px; margin-top: 20px; }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #333; margin-bottom: 20px; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .btn-play { background: #6200ea; color: white; }
-        .btn-stop { background: #ff4081; color: white; }
-        .btn-wd { background: #00ff88; color: black; }
-        #videoArea { display: none; margin-top: 15px; background: #000; border-radius: 15px; }
-        video { width: 100%; border-radius: 15px; }
-        input, select { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
-        .hidden { display: none; }
-        .badge-auto { background: #ffc107; color: black; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
-<script src="https://pl28601477.effectivegatecpm.com/e4/89/f2/e489f2718cc69f00bc14fdca132e6289.js"></script>    </style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #eef2f5; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h1 { color: #2c3e50; margin-bottom: 5px; }
+        .sub-title { color: #7f8c8d; font-size: 14px; margin-bottom: 20px; }
+        .balance-card { background: #2ecc71; color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+        .balance-label { font-size: 14px; opacity: 0.9; }
+        .balance-amount { font-size: 32px; font-weight: bold; }
+        button { background: #3498db; color: white; border: none; padding: 15px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; width: 100%; margin-bottom: 12px; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #2980b9; transform: translateY(-2px); }
+        .btn-withdraw { background: #95a5a6; }
+        .footer { margin-top: 25px; font-size: 11px; color: #bdc3c7; line-height: 1.5; }
+    </style>
+    <script src="https://pl28601477.effectivegatecpm.com/e4/89/f2/e489f2718cc69f00bc14fdca132e6289.js"></script>
 </head>
 <body>
 
-    <div class="header">
-        <div>SALDO AKTIF</div>
-        <div class="saldo-box" id="saldoDisplay">Rp 0</div>
-    </div>
-
     <div class="container">
-        <div class="card" id="mainCard">
-            <div id="autoBadge" class="badge-auto hidden">MODE AUTOPILOT AKTIF</div>
-            <h2>MISI VIDEO</h2>
-            <button id="ctrlBtn" class="btn btn-play" onclick="toggleAuto()">MULAI (PLAY)</button>
-            
-            <div id="videoArea">
-                <video id="adPlayer" playsinline muted src="https://raw.githubusercontent.com/thefcraft/assets/main/ad-video.mp4"></video>
-            </div>
-            
-            <p id="status" style="color:#00ff88">Ready</p>
-            <button class="btn btn-wd" onclick="showWD()">TARIK SALDO (WD)</button>
+        <h1>Cuan Autopilot</h1>
+        <p class="sub-title">Klik misi untuk menambah saldo!</p>
+        
+        <div class="balance-card">
+            <div class="balance-label">Total Saldo Anda</div>
+            <div class="balance-amount">Rp <span id="saldo">0</span></div>
         </div>
-
-        <div class="card hidden" id="wdCard">
-            <h2>DATA PENARIKAN</h2>
-            <select id="wallet">
-                <option value="DANA">DANA</option>
-                <option value="GOPAY">GOPAY</option>
-            </select>
-            <input type="number" id="phone" placeholder="Nomor Dana/Gopay">
-            <button class="btn btn-wd" onclick="processWD()">KIRIM KE ADMIN</button>
-            <button class="btn" style="background:#444; color:white" onclick="hideWD()">KEMBALI</button>
+        
+        <button onclick="tontonVideo()">📺 MISI VIDEO (+Rp 500)</button>
+        <button class="btn-withdraw" onclick="tarikSaldo()">💰 TARIK SALDO</button>
+        
+        <div class="footer">
+            Selesaikan misi setiap hari untuk pencairan lebih cepat.<br>
+            Server ID: PANTATGILANG0-OFFICIAL
         </div>
     </div>
-
-    <script src="https://pl28598920.effectivegatecpm.com/bc/d2/47/bcd2471bcd495d0222d4de7b707d4734.js"></script>
 
     <script>
-        let saldo = parseInt(localStorage.getItem('app_saldo')) || 0;
-        let isAuto = false;
-        let countdown;
-        const sDisplay = document.getElementById('saldoDisplay');
-        sDisplay.innerText = "Rp " + saldo.toLocaleString('id-ID');
+        // Mengambil saldo dari memori HP agar tidak nol lagi saat dibuka kembali
+        let saldo = parseInt(localStorage.getItem('saldo_user')) || 0;
+        document.getElementById('saldo').innerText = saldo.toLocaleString();
 
-        function toggleAuto() {
-            const btn = document.getElementById('ctrlBtn');
-            const badge = document.getElementById('autoBadge');
+        function tontonVideo() {
+            // --- INI KODE IKLAN VIDEO KAMU ---
+            window.open('https://www.effectivegatecpm.com/sxy78czxp?key=ecbe68cdf04e2a8a22c5f0f6403f198c', '_blank');
+
+            // --- PROSES TAMBAH SALDO ---
+            saldo += 500;
+            localStorage.setItem('saldo_user', saldo);
+            document.getElementById('saldo').innerText = saldo.toLocaleString();
             
-            if (!isAuto) {
-                isAuto = true;
-                btn.innerText = "BERHENTI (STOP)";
-                btn.className = "btn btn-stop";
-                badge.classList.remove('hidden');
-                runMisi();
+            alert("Misi Video Berhasil! Saldo Rp 500 telah ditambahkan.");
+        }
+
+        function tarikSaldo() {
+            if (saldo < 100000) {
+                alert("Gagal! Minimal penarikan adalah Rp 100.000. Saldo Anda belum cukup.");
             } else {
-                isAuto = false;
-                btn.innerText = "MULAI (PLAY)";
-                btn.className = "btn btn-play";
-                badge.classList.add('hidden');
-                resetPlayer();
+                alert("Sukses! Permintaan penarikan saldo sedang diproses ke E-Wallet Anda.");
+                saldo = 0;
+                localStorage.setItem('saldo_user', saldo);
+                document.getElementById('saldo').innerText = "0";
             }
         }
-
-        function runMisi() {
-            if (!isAuto) return;
-            
-            const area = document.getElementById('videoArea');
-            const player = document.getElementById('adPlayer');
-            const stat = document.getElementById('status');
-            
-            area.style.display = "block";
-            player.play();
-            
-            let time = 10;
-            stat.innerText = "Menonton: " + time + "s";
-            
-            countdown = setInterval(() => {
-                time--;
-                stat.innerText = "Menonton: " + time + "s";
-                
-                if (time <= 0) {
-                    clearInterval(countdown);
-                    saldo += 100;
-                    localStorage.setItem('app_saldo', saldo);
-                    sDisplay.innerText = "Rp " + saldo.toLocaleString('id-ID');
-                    stat.innerText = "Berhasil! Mencari iklan baru...";
-                    
-                    // Jeda 2 detik sebelum iklan berikutnya
-                    setTimeout(() => {
-                        if (isAuto) runMisi();
-                    }, 2000);
-                }
-            }, 1000);
-        }
-
-        function resetPlayer() {
-            clearInterval(countdown);
-            document.getElementById('videoArea').style.display = "none";
-            document.getElementById('adPlayer').pause();
-            document.getElementById('status').innerText = "Autopilot Dihentikan.";
-        }
-
-        function showWD() {
-            isAuto = false; // Stop auto saat mau WD
-            toggleAuto(); 
-            if(saldo < 2000) return alert("Minimal Rp 2.000");
-            document.getElementById('mainCard').classList.add('hidden');
-            document.getElementById('wdCard').classList.remove('hidden');
-        }
-
-        function hideWD() {
-            document.getElementById('mainCard').classList.remove('hidden');
-            document.getElementById('wdCard').classList.add('hidden');
-        }
-
-        function processWD() {
-            const wall = document.getElementById('wallet').value;
-            const num = document.getElementById('phone').value;
-            if(num.length < 10) return alert("Nomor tidak valid!");
-            window.location.href = "https://wa.me/628123456789?text=WD%20" + wall + "%20Rp" + saldo + "%20ke%20" + num;
-        }
     </script>
+
 </body>
 </html>
+
