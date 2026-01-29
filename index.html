@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APP CUAN AUTOPILOT</title>
+    <style>
+        :root { --primary: #00ff88; --dark: #0f0f0f; --card: #1a1a1a; }
+        body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header { background: var(--primary); width: 100%; padding: 25px; text-align: center; color: black; font-weight: 900; }
+        .saldo-box { font-size: 35px; }
+        .container { width: 92%; max-width: 450px; margin-top: 20px; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #333; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-play { background: #6200ea; color: white; }
+        .btn-stop { background: #ff4081; color: white; }
+        .btn-wd { background: #00ff88; color: black; }
+        #videoArea { display: none; margin-top: 15px; background: #000; border-radius: 15px; }
+        video { width: 100%; border-radius: 15px; }
+        input, select { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
+        .hidden { display: none; }
+        .badge-auto { background: #ffc107; color: black; padding: 2px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>SALDO AKTIF</div>
+        <div class="saldo-box" id="saldoDisplay">Rp 0</div>
+    </div>
+
+    <div class="container">
+        <div class="card" id="mainCard">
+            <div id="autoBadge" class="badge-auto hidden">MODE AUTOPILOT AKTIF</div>
+            <h2>MISI VIDEO</h2>
+            <button id="ctrlBtn" class="btn btn-play" onclick="toggleAuto()">MULAI (PLAY)</button>
+            
+            <div id="videoArea">
+                <video id="adPlayer" playsinline muted src="https://raw.githubusercontent.com/thefcraft/assets/main/ad-video.mp4"></video>
+            </div>
+            
+            <p id="status" style="color:#00ff88">Ready</p>
+            <button class="btn btn-wd" onclick="showWD()">TARIK SALDO (WD)</button>
+        </div>
+
+        <div class="card hidden" id="wdCard">
+            <h2>DATA PENARIKAN</h2>
+            <select id="wallet">
+                <option value="DANA">DANA</option>
+                <option value="GOPAY">GOPAY</option>
+            </select>
+            <input type="number" id="phone" placeholder="Nomor Dana/Gopay">
+            <button class="btn btn-wd" onclick="processWD()">KIRIM KE ADMIN</button>
+            <button class="btn" style="background:#444; color:white" onclick="hideWD()">KEMBALI</button>
+        </div>
+    </div>
+
+    <script src="https://pl28598920.effectivegatecpm.com/bc/d2/47/bcd2471bcd495d0222d4de7b707d4734.js"></script>
+
+    <script>
+        let saldo = parseInt(localStorage.getItem('app_saldo')) || 0;
+        let isAuto = false;
+        let countdown;
+        const sDisplay = document.getElementById('saldoDisplay');
+        sDisplay.innerText = "Rp " + saldo.toLocaleString('id-ID');
+
+        function toggleAuto() {
+            const btn = document.getElementById('ctrlBtn');
+            const badge = document.getElementById('autoBadge');
+            
+            if (!isAuto) {
+                isAuto = true;
+                btn.innerText = "BERHENTI (STOP)";
+                btn.className = "btn btn-stop";
+                badge.classList.remove('hidden');
+                runMisi();
+            } else {
+                isAuto = false;
+                btn.innerText = "MULAI (PLAY)";
+                btn.className = "btn btn-play";
+                badge.classList.add('hidden');
+                resetPlayer();
+            }
+        }
+
+        function runMisi() {
+            if (!isAuto) return;
+            
+            const area = document.getElementById('videoArea');
+            const player = document.getElementById('adPlayer');
+            const stat = document.getElementById('status');
+            
+            area.style.display = "block";
+            player.play();
+            
+            let time = 10;
+            stat.innerText = "Menonton: " + time + "s";
+            
+            countdown = setInterval(() => {
+                time--;
+                stat.innerText = "Menonton: " + time + "s";
+                
+                if (time <= 0) {
+                    clearInterval(countdown);
+                    saldo += 100;
+                    localStorage.setItem('app_saldo', saldo);
+                    sDisplay.innerText = "Rp " + saldo.toLocaleString('id-ID');
+                    stat.innerText = "Berhasil! Mencari iklan baru...";
+                    
+                    // Jeda 2 detik sebelum iklan berikutnya
+                    setTimeout(() => {
+                        if (isAuto) runMisi();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        function resetPlayer() {
+            clearInterval(countdown);
+            document.getElementById('videoArea').style.display = "none";
+            document.getElementById('adPlayer').pause();
+            document.getElementById('status').innerText = "Autopilot Dihentikan.";
+        }
+
+        function showWD() {
+            isAuto = false; // Stop auto saat mau WD
+            toggleAuto(); 
+            if(saldo < 2000) return alert("Minimal Rp 2.000");
+            document.getElementById('mainCard').classList.add('hidden');
+            document.getElementById('wdCard').classList.remove('hidden');
+        }
+
+        function hideWD() {
+            document.getElementById('mainCard').classList.remove('hidden');
+            document.getElementById('wdCard').classList.add('hidden');
+        }
+
+        function processWD() {
+            const wall = document.getElementById('wallet').value;
+            const num = document.getElementById('phone').value;
+            if(num.length < 10) return alert("Nomor tidak valid!");
+            window.location.href = "https://wa.me/628123456789?text=WD%20" + wall + "%20Rp" + saldo + "%20ke%20" + num;
+        }
+    </script>
+</body>
+</html>

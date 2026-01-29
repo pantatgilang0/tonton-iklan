@@ -1,0 +1,97 @@
+#!/data/data/com.termux/files/usr/bin/bash
+
+cd ~/storage/downloads/tonton-iklan-app
+rm index.html
+
+cat <<EOF > index.html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONTON IKLAN DAPAT UANG</title>
+    <style>
+        :root { --primary: #00ff88; --dark: #0f0f0f; --card: #1a1a1a; }
+        body { font-family: sans-serif; background: var(--dark); color: white; margin: 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header { background: var(--primary); width: 100%; padding: 25px; text-align: center; color: black; font-weight: 900; border-bottom: 4px solid #00cc6e; }
+        .saldo-box { font-size: 35px; margin-top: 5px; }
+        .container { width: 92%; max-width: 450px; margin-top: 25px; }
+        .ad-card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .btn-watch { background: #6200ea; color: white; box-shadow: 0 4px 15px rgba(98,0,234,0.4); }
+        .btn-redeem { background: #00ff88; color: black; }
+        #videoArea { display: none; margin-top: 20px; width: 100%; border-radius: 15px; overflow: hidden; background: #000; line-height: 0; }
+        video { width: 100%; height: auto; border-radius: 15px; }
+        #status { font-size: 14px; color: #00ff88; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>SALDO AKTIF</div>
+        <div class="saldo-box">Rp <span id="saldo">0</span></div>
+    </div>
+
+    <div class="container">
+        <div class="ad-card">
+            <h2 style="margin-top:0">MISI VIDEO</h2>
+            <p>Tonton iklan MP4 sampai selesai untuk klaim reward.</p>
+            <button id="btnWatch" class="btn btn-watch" onclick="startAd()">MULAI NONTON</button>
+            
+            <div id="videoArea">
+                <video id="adPlayer" playsinline>
+                    <source src="https://raw.githubusercontent.com/thefcraft/assets/main/ad-video.mp4" type="video/mp4">
+                </video>
+            </div>
+            
+            <p id="status">Ready</p>
+        </div>
+        <button class="btn btn-redeem" onclick="redeem()">TARIK SALDO (WD)</button>
+    </div>
+
+    <script src="https://pl28598920.effectivegatecpm.com/bc/d2/47/bcd2471bcd495d0222d4de7b707d4734.js"></script>
+
+    <script>
+        let saldo = parseInt(localStorage.getItem('app_saldo')) || 0;
+        const saldoDisplay = document.getElementById('saldo');
+        saldoDisplay.innerText = saldo.toLocaleString('id-ID');
+
+        function startAd() {
+            const btn = document.getElementById('btnWatch');
+            const status = document.getElementById('status');
+            const videoArea = document.getElementById('videoArea');
+            const player = document.getElementById('adPlayer');
+
+            btn.disabled = true;
+            videoArea.style.display = "block";
+            player.play();
+            
+            let timer = 15;
+            const countdown = setInterval(() => {
+                timer--;
+                status.innerText = "IKLAN BERJALAN: " + timer + "s";
+                if (timer <= 0) {
+                    clearInterval(countdown);
+                    player.pause();
+                    videoArea.style.display = "none";
+                    saldo += 100;
+                    localStorage.setItem('app_saldo', saldo);
+                    saldoDisplay.innerText = saldo.toLocaleString('id-ID');
+                    status.innerText = "REWARD BERHASIL DIKLAIM!";
+                    btn.disabled = false;
+                }
+            }, 1000);
+        }
+
+        function redeem() {
+            if (saldo < 2000) alert("Saldo minimal Rp 2.000");
+            else window.location.href = "https://wa.me/628123456789?text=Konfirmasi%20WD%20Rp" + saldo;
+        }
+    </script>
+</body>
+</html>
+EOF
+
+chmod +x fix_ad
+./fix_ad
+npx http-server
