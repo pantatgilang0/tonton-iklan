@@ -3,45 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuan Autopilot</title>
+    <title>Cuan Autopilot V2</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f0f2f5; padding: 20px; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 350px; margin: auto; }
+        body { font-family: sans-serif; text-align: center; background: #f0f2f5; padding: 20px; margin: 0; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 350px; margin: auto; position: relative; z-index: 1; }
         .balance { background: #2ecc71; color: white; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 24px; font-weight: bold; }
-        button { background: #3498db; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        button { background: #3498db; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #bdc3c7; cursor: not-allowed; }
         .status { font-size: 12px; color: #7f8c8d; margin-top: 15px; }
+
+        /* Overlay Iklan */
+        #iklan-layar {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; color: white; z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
+        }
+        #timer-box { font-size: 60px; font-weight: bold; color: #2ecc71; }
+        #btn-tutup {
+            display: none; position: absolute; top: 20px; right: 20px;
+            background: red; color: white; border: none; padding: 10px 18px;
+            border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer;
+        }
     </style>
-    <script src="https://pl28601477.effectivegatecpm.com/e4/89/f2/e489f2718cc69f00bc14fdca132e6289.js"></script>
+
+    <script src="https://pl28606612.effectivegatecpm.com/59/b3/e8/59b3e86754e4943e8fe6f30131f537e7.js"></script>
 </head>
 <body>
+
     <div class="card">
         <h2>Cuan Autopilot</h2>
         <div class="balance">Rp <span id="saldo">0</span></div>
-        <button onclick="tontonVideo()">KLAIM SALDO</button>
+        <button id="btn-klaim" onclick="jalankanProses()">PUTAR IKLAN OTOMATIS</button>
         <div class="status">Sistem ID: PANTATGILANG0-OFFICIAL</div>
+    </div>
+
+    <div id="iklan-layar">
+        <button id="btn-tutup" onclick="tutupIklan()">X</button>
+        <h3>Iklan Sedang Berjalan...</h3>
+        <div id="timer-box">45</div>
+        <p>Jangan keluar dari aplikasi</p>
     </div>
 
     <script>
         let saldo = parseInt(localStorage.getItem('saldo_user')) || 0;
         document.getElementById('saldo').innerText = saldo.toLocaleString();
+        
+        let detik = 45;
+        let timer;
 
-        function tontonVideo() {
+        function jalankanProses() {
+            // 1. Munculkan Layar Hitam (Iklan)
+            document.getElementById('iklan-layar').style.display = 'flex';
+            document.getElementById('btn-klaim').disabled = true;
+            document.getElementById('btn-tutup').style.display = 'none';
+            detik = 45;
+            document.getElementById('timer-box').innerText = detik;
+
+            // 2. Buka Direct Link Iklan (Skrip Lama)
             const link = 'https://www.effectivegatecpm.com/sxy78czxp?key=ecbe68cdf04e2a8a22c5f0f6403f198c';
-            
-            const a = document.createElement('a');
-            a.href = link;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            window.open(link, '_blank');
 
+            // 3. Jalankan Hitung Mundur
+            timer = setInterval(function() {
+                detik--;
+                document.getElementById('timer-box').innerText = detik;
+
+                if (detik <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('timer-box').innerText = "DONE";
+                    // Tampilkan tombol X agar Robot Auto.js bisa klik
+                    document.getElementById('btn-tutup').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function tutupIklan() {
+            // Tambah Saldo
             saldo += 500;
             localStorage.setItem('saldo_user', saldo);
             document.getElementById('saldo').innerText = saldo.toLocaleString();
+
+            // Reset Tampilan
+            document.getElementById('iklan-layar').style.display = 'none';
+            document.getElementById('btn-klaim').disabled = false;
         }
 
-        setInterval(tontonVideo, 45000);
+        // Auto Pilot: Jika ingin otomatis klik sendiri tanpa robot tiap 60 detik
+        // setInterval(jalankanProses, 60000);
     </script>
 </body>
 </html>
