@@ -2,93 +2,132 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>Billiard Cuan - Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <title>8 BALL CUAN - PRO VERSION</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #0f172a; margin: 0; overflow: hidden; }
-        .font-game { font-family: 'Black Ops One', cursive; }
-        
-        /* Peringatan Putar Layar */
-        #orientation-overlay {
-            display: none;
-            position: fixed; inset: 0; background: #0f172a; z-index: 9999;
-            flex-direction: column; justify-content: center; align-items: center; text-align: center;
-        }
-        @media screen and (orientation: portrait) {
-            #orientation-overlay { display: flex; }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;900&display=swap');
+        * { -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; color: white; background: #000; }
+        .font-game { font-family: 'Orbitron', sans-serif; }
+        #bg-video { position: fixed; inset: 0; z-index: -1; filter: brightness(0.35); object-fit: cover; width:100%; height:100%; }
+        .glass { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-nominal { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; cursor: pointer; }
+        .btn-nominal.active { background: #3b82f6; border-color: #60a5fa; transform: scale(1.05); box-shadow: 0 0 15px rgba(59,130,246,0.5); }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.5); border-radius: 10px; }
+        @media screen and (orientation: portrait) { #orientation-overlay { display: flex; } }
+        #orientation-overlay { display: none; position: fixed; inset: 0; background: #070b14; z-index: 99999; flex-direction: column; justify-content: center; align-items: center; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
+
+    <audio id="bg-music" loop><source src="https://www.bensound.com/bensound-music/bensound-thejazzpiano.mp3" type="audio/mp3"></audio>
+    <audio id="sfx-coin"><source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mp3"></audio>
+    <audio id="sfx-click"><source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mp3"></audio>
+
+    <video autoplay muted loop id="bg-video" playsinline>
+        <source src="https://assets.mixkit.co/video-files/free-video-files/4288/4288-preview.mp4" type="video/mp4">
+    </video>
 
     <div id="orientation-overlay">
-        <div class="animate-bounce mb-4">
-            <i class="fas fa-mobile-alt text-6xl text-yellow-500" style="transform: rotate(90deg);"></i>
-        </div>
-        <h2 class="text-2xl font-black text-white px-6 uppercase">Putar HP Kamu!</h2>
-        <p class="text-slate-400 mt-2">Gunakan mode Landscape (Tidur) untuk bermain.</p>
+        <i class="fas fa-expand-arrows-alt text-5xl text-blue-400 mb-4 animate-pulse"></i>
+        <h2 class="text-xl font-game font-black uppercase">Aktifkan Rotasi Layar</h2>
     </div>
 
-    <div id="login-screen" class="h-screen flex flex-col justify-center items-center p-6 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 to-slate-950">
-        <div class="text-center mb-8">
-            <i class="fas fa-8-ball text-7xl text-yellow-500 mb-2 drop-shadow-lg"></i>
-            <h1 class="text-5xl font-game text-white tracking-tighter uppercase">Billiard <span class="text-yellow-500">Cuan</span></h1>
-            <p class="text-slate-400 text-sm mt-2">Login dengan Google untuk Sinkron Teman</p>
-        </div>
-        
-        <button onclick="loginGoogle()" class="bg-white text-slate-900 font-black py-4 px-10 rounded-full flex items-center gap-3 shadow-2xl hover:scale-105 transition-all active:scale-95">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa-lightbox/google.svg" class="w-6" alt="google">
-            MASUK DENGAN GOOGLE
+    <div id="login-screen" class="h-screen flex flex-col justify-center items-center">
+        <h1 class="text-7xl font-game font-black italic mb-10 text-white drop-shadow-2xl">8 BALL <span class="text-blue-400">CUAN</span></h1>
+        <button onclick="startApp()" class="bg-white text-black font-black py-5 px-16 rounded-full flex items-center gap-4 shadow-2xl active:scale-90 transition-all">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa-lightbox/google.svg" class="w-6"> MASUK ARENA
         </button>
     </div>
 
-    <div id="main-game" class="h-screen w-full hidden flex p-4 gap-4 bg-slate-950">
-        <div class="w-1/3 bg-slate-900 rounded-3xl p-4 border border-slate-800 flex flex-col justify-between shadow-xl">
-            <div class="flex items-center gap-3">
-                <img id="user-photo" src="" class="w-12 h-12 rounded-full border-2 border-yellow-500 bg-slate-800">
+    <div id="main-game" class="h-screen w-full hidden flex p-4 gap-4">
+        
+        <div class="w-1/4 flex flex-col gap-3">
+            <div class="glass rounded-3xl p-4 flex items-center gap-3">
+                <img id="user-photo" src="" class="w-12 h-12 rounded-full border-2 border-blue-400 shadow-lg">
                 <div class="overflow-hidden">
-                    <p id="user-name" class="font-black text-sm truncate uppercase text-white">Player</p>
-                    <p id="user-id" class="text-[10px] text-yellow-500 font-mono font-bold">ID: --</p>
+                    <p id="user-name" class="font-black text-[11px] truncate uppercase">PLAYER</p>
+                    <div class="flex items-center gap-1">
+                        <p id="user-id" class="text-[9px] text-blue-300 font-mono">ID: --</p>
+                        <button onclick="copyMyId()" class="text-[8px] text-slate-500"><i class="fas fa-copy"></i></button>
+                    </div>
                 </div>
             </div>
-            <div class="space-y-2">
-                <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700">
-                    <p class="text-[9px] text-slate-500 font-bold uppercase">Saldo Anda</p>
-                    <p id="user-balance" class="text-xl font-black text-green-400">Rp 0</p>
+
+            <div class="glass rounded-3xl flex-1 p-4 flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center mb-4 text-[10px] font-black uppercase tracking-widest text-blue-400">
+                    <span>Teman Mabar</span>
+                    <button onclick="showGlobalPlayers()" class="bg-blue-600/30 px-3 py-1 rounded-lg text-white hover:bg-blue-600 transition-all">CARI</button>
                 </div>
-                <div class="bg-slate-800 p-3 rounded-2xl border border-slate-700">
-                    <p class="text-[9px] text-slate-500 font-bold uppercase">Win Streak</p>
-                    <p id="user-wins" class="text-xl font-black text-blue-400">0</p>
-                </div>
+                <div id="friends-list" class="flex-1 overflow-y-auto space-y-2 custom-scroll pr-2"></div>
+                <button onclick="showAdmin()" class="mt-2 text-[8px] text-white/10 text-center uppercase">Admin Dashboard</button>
             </div>
-            <button onclick="logout()" class="text-[10px] text-slate-600 font-bold hover:text-red-500 transition-colors uppercase italic">Logout</button>
         </div>
 
-        <div class="w-2/3 bg-slate-900 rounded-3xl p-6 border border-slate-800 flex flex-col justify-center relative">
-            <h2 class="text-yellow-500 font-black mb-6 flex items-center gap-2 text-xl uppercase italic">
-                <i class="fas fa-crosshairs text-red-500"></i> Battle Arena
-            </h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <input id="target-id" type="text" placeholder="ID LAWAN" class="w-full bg-slate-950 border border-slate-700 p-4 rounded-2xl outline-none focus:border-yellow-500 font-mono text-center text-lg text-white">
-                <input id="bet-val" type="number" placeholder="TARUHAN (RP)" class="w-full bg-slate-950 border border-slate-700 p-4 rounded-2xl outline-none focus:border-green-500 font-black text-center text-lg text-green-400">
+        <div class="flex-1 flex flex-col gap-4">
+            <div class="glass rounded-3xl p-6 flex justify-between items-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                <div>
+                    <p class="text-[10px] font-black text-blue-300 uppercase tracking-widest">Saldo Penarikan Dana</p>
+                    <p id="user-balance" class="text-4xl font-game font-black text-white">Rp 0</p>
+                </div>
+                <button onclick="requestWD()" class="bg-gradient-to-r from-red-600 to-red-500 px-8 py-4 rounded-2xl font-black text-[11px] uppercase shadow-lg active:scale-95 transition-all">Withdraw</button>
             </div>
-            <button onclick="claimWin()" class="bg-yellow-500 text-slate-950 font-black py-5 rounded-2xl shadow-lg shadow-yellow-500/20 active:scale-95 transition-all text-2xl uppercase italic">
-                SAYA MENANG!
-            </button>
+
+            <div class="flex-1 glass rounded-[2.5rem] p-8 flex flex-col relative overflow-hidden">
+                <h2 class="text-center font-game text-xs font-black text-blue-300 mb-6 uppercase tracking-[0.3em]">Betting Arena</h2>
+                
+                <div id="nominal-grid" class="grid grid-cols-5 gap-3 mb-8"></div>
+
+                <div class="bg-black/40 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1">
+                            <p class="text-[9px] text-slate-500 uppercase font-black mb-1 ml-2">Target Lawan</p>
+                            <input id="target-id" type="text" placeholder="PILIH TEMAN DI KIRI" readonly class="w-full bg-transparent text-2xl font-mono text-blue-400 outline-none">
+                        </div>
+                        <button id="btn-challenge" onclick="sendChallenge()" class="bg-blue-600 hover:bg-blue-500 px-10 py-5 rounded-2xl font-black text-sm uppercase shadow-xl transition-all active:scale-95">
+                            KIRIM TANTANGAN
+                        </button>
+                    </div>
+                </div>
+
+                <div id="match-status" class="mt-6 hidden glass border-yellow-500/50 p-6 rounded-[2rem] flex flex-col items-center gap-4 animate-pulse">
+                    <p id="match-info" class="font-black text-sm uppercase text-yellow-400">Match Sedang Berlangsung...</p>
+                    <div class="flex gap-4">
+                        <button id="btn-claim-win" onclick="claimWin()" class="bg-green-600 px-8 py-3 rounded-xl font-black text-xs uppercase shadow-lg">SAYA MENANG!</button>
+                        <button id="btn-confirm-lose" onclick="confirmLose()" class="bg-slate-700 px-8 py-3 rounded-xl font-black text-xs uppercase opacity-50">KONFIRMASI KALAH</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full text-sm font-black shadow-2xl hidden z-[10000]"></div>
+    <div id="incoming-box" class="fixed top-10 right-10 z-[100000] hidden glass border-blue-500 p-6 rounded-3xl w-80 animate-bounce shadow-2xl">
+        <p id="incoming-msg" class="text-xs font-bold mb-4"></p>
+        <div class="flex gap-2">
+            <button onclick="acceptChallenge()" class="flex-1 bg-green-600 py-3 rounded-xl font-black text-[10px] uppercase">Terima</button>
+            <button onclick="rejectChallenge()" class="flex-1 bg-red-600 py-3 rounded-xl font-black text-[10px] uppercase">Tolak</button>
+        </div>
+    </div>
+
+    <div id="modal" class="fixed inset-0 bg-black/90 z-[99999] hidden flex justify-center items-center p-6 backdrop-blur-md">
+        <div class="glass w-full max-w-sm rounded-[2rem] p-8 relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6"><i class="fas fa-times"></i></button>
+            <h2 id="modal-title" class="font-game text-xs text-blue-300 mb-6 uppercase tracking-widest">Player List</h2>
+            <div id="modal-content" class="max-h-60 overflow-y-auto space-y-3 custom-scroll"></div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 px-10 py-4 rounded-full text-[10px] font-black shadow-2xl hidden z-[200000] text-white"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIG FIREBASE KAMU (DARI SCREENSHOT)
         const firebaseConfig = {
             apiKey: "AIzaSyBtWXJHlpUoIoQL7EoBJabgD95KP1kXCWM",
             authDomain: "biliardcuan.firebaseapp.com",
@@ -104,72 +143,222 @@
         const db = getDatabase(app);
         const provider = new GoogleAuthProvider();
 
-        window.loginGoogle = () => {
-            signInWithPopup(auth, provider).catch(err => {
-                alert("Gagal Login. Pastikan domain sudah ditambahkan di Firebase Authorized Domains.");
-            });
-        };
+        const nominals = [1000, 2000, 3000, 5000, 10000, 20000, 50000, 100000, 500000, 1000000];
+        let selectedNominal = 0;
+        let myUid = "";
+        let friends = JSON.parse(localStorage.getItem('billiard_friends') || '[]');
+        let activeMatch = null;
 
-        window.logout = () => { if(confirm("Keluar?")) signOut(auth).then(() => location.reload()); };
+        window.startApp = () => {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            document.getElementById('bg-music').play();
+            signInWithPopup(auth, provider);
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
+                myUid = "ID-" + user.uid.substring(0, 4).toUpperCase();
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-game').classList.replace('hidden', 'flex');
-
-                const myUid = "ID-" + user.uid.substring(0, 4).toUpperCase();
-                const userRef = ref(db, 'players/' + myUid);
                 
+                const userRef = ref(db, 'players/' + myUid);
                 const snap = await get(userRef);
-                if (!snap.exists()) {
-                    await set(userRef, { uid: myUid, name: user.displayName, photo: user.photoURL, balance: 100000, wins: 0 });
-                }
+                if (!snap.exists()) set(userRef, { uid: myUid, name: user.displayName, photo: user.photoURL, balance: 100000 });
 
-                document.getElementById('user-name').innerText = user.displayName;
-                document.getElementById('user-photo').src = user.photoURL;
-                document.getElementById('user-id').innerText = "ID: " + myUid;
-
-                onValue(userRef, (s) => {
+                onValue(userRef, s => {
                     const d = s.val();
-                    if(d) {
-                        document.getElementById('user-balance').innerText = "Rp " + d.balance.toLocaleString();
-                        document.getElementById('user-wins').innerText = d.wins;
+                    if(d) document.getElementById('user-balance').innerText = "Rp " + d.balance.toLocaleString();
+                });
+
+                // Listen Tantangan Masuk
+                onValue(ref(db, 'challenges/' + myUid), (s) => {
+                    const data = s.val();
+                    if(data) {
+                        document.getElementById('incoming-msg').innerText = `${data.senderName} Menantang Rp ${data.nominal.toLocaleString()}`;
+                        document.getElementById('incoming-box').classList.remove('hidden');
+                    } else {
+                        document.getElementById('incoming-box').classList.add('hidden');
                     }
                 });
+
+                // Listen Match Aktif
+                onValue(ref(db, 'matches'), (s) => {
+                    const matches = s.val();
+                    activeMatch = null;
+                    document.getElementById('match-status').classList.add('hidden');
+                    
+                    if(matches) {
+                        for(let key in matches) {
+                            if(matches[key].p1 === myUid || matches[key].p2 === myUid) {
+                                activeMatch = { id: key, ...matches[key] };
+                                document.getElementById('match-status').classList.remove('hidden');
+                                document.getElementById('match-info').innerText = `Tanding vs ${activeMatch.p1 === myUid ? activeMatch.p2 : activeMatch.p1} (Rp ${activeMatch.nominal.toLocaleString()})`;
+                                
+                                // Reset tombol jika lawan sudah klaim
+                                if(activeMatch.winnerClaim && activeMatch.winnerClaim !== myUid) {
+                                    document.getElementById('btn-confirm-lose').classList.remove('opacity-50', 'bg-slate-700');
+                                    document.getElementById('btn-confirm-lose').classList.add('bg-red-600', 'animate-pulse');
+                                    document.getElementById('match-info').innerText = "LAWAN KLAIM MENANG! KONFIRMASI?";
+                                }
+                            }
+                        }
+                    }
+                });
+
+                renderNominals();
+                renderFriends();
             }
         });
 
-        window.claimWin = async () => {
-            const oppId = document.getElementById('target-id').value.trim().toUpperCase();
-            const bet = parseInt(document.getElementById('bet-val').value);
-            const myUid = "ID-" + auth.currentUser.uid.substring(0, 4).toUpperCase();
-
-            if (!oppId || isNaN(bet) || bet <= 0) return showToast("DATA TIDAK VALID!", "bg-red-600");
+        window.sendChallenge = async () => {
+            const target = document.getElementById('target-id').value;
+            if(!target || selectedNominal <= 0) return showToast("Pilih lawan & nominal!", "bg-red-600");
             
-            const oppRef = ref(db, 'players/' + oppId);
-            const oppSnap = await get(oppRef);
+            const mySnap = await get(ref(db, 'players/' + myUid));
+            if(mySnap.val().balance < selectedNominal) return showToast("Saldo kurang!", "bg-red-600");
 
-            if (!oppSnap.exists()) return showToast("ID LAWAN TIDAK ADA!", "bg-red-600");
-            
-            const oppData = oppSnap.val();
-            if (oppData.balance < bet) return showToast("SALDO LAWAN KURANG!", "bg-orange-600");
-
-            await update(oppRef, { balance: oppData.balance - bet });
-            const myRef = ref(db, 'players/' + myUid);
-            const mySnap = await get(myRef);
-            await update(myRef, { balance: mySnap.val().balance + bet, wins: mySnap.val().wins + 1 });
-
-            showToast("MENANG! SALDO BERTAMBAH.", "bg-green-600");
-            document.getElementById('target-id').value = "";
-            document.getElementById('bet-val').value = "";
+            set(ref(db, 'challenges/' + target), { senderId: myUid, senderName: auth.currentUser.displayName, nominal: selectedNominal });
+            showToast("Tantangan terkirim!", "bg-blue-600");
         };
 
-        function showToast(txt, cls) {
+        window.acceptChallenge = async () => {
+            const snap = await get(ref(db, 'challenges/' + myUid));
+            const data = snap.val();
+            const nom = data.nominal;
+
+            // Potong Saldo Keduanya (Escrow)
+            const p1Ref = ref(db, 'players/' + data.senderId);
+            const p2Ref = ref(db, 'players/' + myUid);
+            
+            const p1Snap = await get(p1Ref);
+            const p2Snap = await get(p2Ref);
+
+            if(p1Snap.val().balance < nom || p2Snap.val().balance < nom) {
+                showToast("Salah satu saldo tidak cukup!", "bg-red-600");
+                return remove(ref(db, 'challenges/' + myUid));
+            }
+
+            await update(p1Ref, { balance: p1Snap.val().balance - nom });
+            await update(p2Ref, { balance: p2Snap.val().balance - nom });
+
+            // Buat Match
+            const matchId = "MATCH-" + Date.now();
+            set(ref(db, 'matches/' + matchId), { p1: data.senderId, p2: myUid, nominal: nom, status: 'playing', pot: nom * 2 });
+            
+            remove(ref(db, 'challenges/' + myUid));
+            showToast("Match Dimulai! Saldo dikunci.", "bg-green-600");
+        };
+
+        window.claimWin = () => {
+            if(!activeMatch) return;
+            update(ref(db, 'matches/' + activeMatch.id), { winnerClaim: myUid });
+            showToast("Menunggu konfirmasi lawan...", "bg-blue-600");
+        };
+
+        window.confirmLose = async () => {
+            if(!activeMatch || !activeMatch.winnerClaim || activeMatch.winnerClaim === myUid) return;
+            
+            const pot = activeMatch.pot;
+            const fee = pot * 0.1; // 10% CUAN ADMIN
+            const prize = pot - fee;
+
+            // Update Pemenang
+            const winSnap = await get(ref(db, 'players/' + activeMatch.winnerClaim));
+            await update(ref(db, 'players/' + activeMatch.winnerClaim), { balance: winSnap.val().balance + prize });
+
+            // Simpan Keuntungan Admin
+            const admSnap = await get(ref(db, 'admin_profit'));
+            const currentAdm = admSnap.exists() ? admSnap.val().total : 0;
+            set(ref(db, 'admin_profit'), { total: currentAdm + fee });
+
+            // Hapus Match
+            remove(ref(db, 'matches/' + activeMatch.id));
+            
+            document.getElementById('sfx-coin').play();
+            showToast("Match selesai! Uang terkirim.", "bg-blue-600");
+        };
+
+        // UI HELPERS
+        function renderNominals() {
+            const grid = document.getElementById('nominal-grid');
+            grid.innerHTML = nominals.map(n => `
+                <div onclick="selectNom(this, ${n})" class="btn-nominal p-3 rounded-2xl flex flex-col items-center justify-center border border-white/10">
+                    <span class="text-[7px] text-blue-400 font-black uppercase">Bet</span>
+                    <span class="text-[10px] font-black">${n >= 1000000 ? '1 JT' : (n/1000)+'K'}</span>
+                </div>
+            `).join('');
+        }
+
+        window.selectNom = (el, n) => {
+            document.querySelectorAll('.btn-nominal').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            selectedNominal = n;
+            document.getElementById('sfx-click').play();
+        };
+
+        window.showGlobalPlayers = async () => {
+            const snap = await get(ref(db, 'players'));
+            const content = document.getElementById('modal-content');
+            document.getElementById('modal').classList.remove('hidden');
+            let html = "";
+            snap.forEach(c => {
+                const p = c.val();
+                if(p.uid !== myUid) html += `
+                <div class="bg-white/5 p-4 rounded-2xl flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <img src="${p.photo}" class="w-10 h-10 rounded-full">
+                        <p class="text-[11px] font-bold">${p.name}</p>
+                    </div>
+                    <button onclick="addFriend('${p.uid}','${p.name}','${p.photo}')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black">ADD</button>
+                </div>`;
+            });
+            content.innerHTML = html;
+        };
+
+        window.addFriend = (uid, name, photo) => {
+            if(!friends.find(f => f.uid === uid)) {
+                friends.push({uid, name, photo});
+                localStorage.setItem('billiard_friends', JSON.stringify(friends));
+                renderFriends();
+            }
+            closeModal();
+        };
+
+        function renderFriends() {
+            const list = document.getElementById('friends-list');
+            list.innerHTML = friends.map(f => `
+                <div onclick="document.getElementById('target-id').value='${f.uid}'" class="bg-white/5 p-3 rounded-2xl flex items-center gap-3 hover:bg-blue-500/20 cursor-pointer mb-2 border border-transparent hover:border-blue-500/30">
+                    <img src="${f.photo}" class="w-8 h-8 rounded-full border border-blue-400">
+                    <p class="text-[10px] font-black truncate">${f.name}</p>
+                </div>
+            `).join('') || '<p class="text-center text-[9px] text-slate-600 mt-10">Belum ada teman</p>';
+        }
+
+        window.showAdmin = async () => {
+            const pin = prompt("Admin PIN:");
+            if(pin === "1234") { // Ganti PIN sesuai keinginanmu
+                const adm = await get(ref(db, 'admin_profit'));
+                alert(`Total Cuan Admin (10%): Rp ${(adm.val() ? adm.val().total : 0).toLocaleString()}`);
+            }
+        };
+
+        window.requestWD = () => {
+            const am = prompt("Jumlah Tarik:");
+            const info = prompt("Nomor DANA:");
+            if(am && info) {
+                push(ref(db, 'withdraw_requests'), { uid: myUid, name: auth.currentUser.displayName, amount: am, info, status: 'PENDING' });
+                showToast("Request WD terkirim!", "bg-green-600");
+            }
+        };
+
+        window.showToast = (txt, cls) => {
             const t = document.getElementById('toast');
             t.innerText = txt;
-            t.className = `fixed top-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-full text-sm font-black shadow-2xl block text-white ${cls}`;
+            t.className = `fixed top-10 left-1/2 -translate-x-1/2 px-10 py-4 rounded-full text-[10px] font-black shadow-2xl block ${cls}`;
             setTimeout(() => t.classList.add('hidden'), 3000);
-        }
+        };
+        window.closeModal = () => document.getElementById('modal').classList.add('hidden');
+        window.copyMyId = () => { navigator.clipboard.writeText(myUid); showToast("ID Disalin!", "bg-blue-600"); };
     </script>
 </body>
 </html>
