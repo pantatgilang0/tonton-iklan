@@ -2,363 +2,117 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>8 BALL CUAN - PRO VERSION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NONTON CUAN - ANTI BLACKOUT</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@400;900&display=swap');
-        * { -webkit-tap-highlight-color: transparent; user-select: none; }
-        body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; color: white; background: #000; }
-        .font-game { font-family: 'Orbitron', sans-serif; }
-        #bg-video { position: fixed; inset: 0; z-index: -1; filter: brightness(0.35); object-fit: cover; width:100%; height:100%; }
-        .glass { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-nominal { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; cursor: pointer; }
-        .btn-nominal.active { background: #3b82f6; border-color: #60a5fa; transform: scale(1.05); box-shadow: 0 0 15px rgba(59,130,246,0.5); }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.5); border-radius: 10px; }
-        @media screen and (orientation: portrait) { #orientation-overlay { display: flex; } }
-        #orientation-overlay { display: none; position: fixed; inset: 0; background: #070b14; z-index: 99999; flex-direction: column; justify-content: center; align-items: center; }
+        body { background: #0a0a0a; color: white; font-family: sans-serif; margin: 0; cursor: pointer; }
+        .yt-frame { background: #111; border-radius: 12px; position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; border: 1px solid #333; display: flex; align-items: center; justify-content: center; }
+        .progress-fill { height: 100%; background: #ff0000; width: 0%; transition: width 1s linear; }
+        .ad-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 80px; }
+        .ad-slot { background: #111; border: 1px solid #222; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 50px; }
+        iframe { border: none; }
+        .sticky-header { position: sticky; top: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #222; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body onclick="openSmartlink()">
 
-    <audio id="bg-music" loop><source src="https://www.bensound.com/bensound-music/bensound-thejazzpiano.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-coin"><source src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" type="audio/mp3"></audio>
-    <audio id="sfx-click"><source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3" type="audio/mp3"></audio>
-
-    <video autoplay muted loop id="bg-video" playsinline>
-        <source src="https://assets.mixkit.co/video-files/free-video-files/4288/4288-preview.mp4" type="video/mp4">
-    </video>
-
-    <div id="orientation-overlay">
-        <i class="fas fa-expand-arrows-alt text-5xl text-blue-400 mb-4 animate-pulse"></i>
-        <h2 class="text-xl font-game font-black uppercase">Aktifkan Rotasi Layar</h2>
-    </div>
-
-    <div id="login-screen" class="h-screen flex flex-col justify-center items-center">
-        <h1 class="text-7xl font-game font-black italic mb-10 text-white drop-shadow-2xl">8 BALL <span class="text-blue-400">CUAN</span></h1>
-        <button onclick="startApp()" class="bg-white text-black font-black py-5 px-16 rounded-full flex items-center gap-4 shadow-2xl active:scale-90 transition-all">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa-lightbox/google.svg" class="w-6"> MASUK ARENA
-        </button>
-    </div>
-
-    <div id="main-game" class="h-screen w-full hidden flex p-4 gap-4">
-        
-        <div class="w-1/4 flex flex-col gap-3">
-            <div class="glass rounded-3xl p-4 flex items-center gap-3">
-                <img id="user-photo" src="" class="w-12 h-12 rounded-full border-2 border-blue-400 shadow-lg">
-                <div class="overflow-hidden">
-                    <p id="user-name" class="font-black text-[11px] truncate uppercase">PLAYER</p>
-                    <div class="flex items-center gap-1">
-                        <p id="user-id" class="text-[9px] text-blue-300 font-mono">ID: --</p>
-                        <button onclick="copyMyId()" class="text-[8px] text-slate-500"><i class="fas fa-copy"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass rounded-3xl flex-1 p-4 flex flex-col overflow-hidden">
-                <div class="flex justify-between items-center mb-4 text-[10px] font-black uppercase tracking-widest text-blue-400">
-                    <span>Teman Mabar</span>
-                    <button onclick="showGlobalPlayers()" class="bg-blue-600/30 px-3 py-1 rounded-lg text-white hover:bg-blue-600 transition-all">CARI</button>
-                </div>
-                <div id="friends-list" class="flex-1 overflow-y-auto space-y-2 custom-scroll pr-2"></div>
-                <button onclick="showAdmin()" class="mt-2 text-[8px] text-white/10 text-center uppercase">Admin Dashboard</button>
-            </div>
+    <div class="sticky-header p-4 flex justify-between items-center w-full">
+        <div>
+            <p class="text-[10px] font-bold text-slate-500 uppercase">Total Cuan</p>
+            <h1 class="text-2xl font-black text-green-400">Rp <span id="saldo">11.900</span></h1>
         </div>
-
-        <div class="flex-1 flex flex-col gap-4">
-            <div class="glass rounded-3xl p-6 flex justify-between items-center relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                <div>
-                    <p class="text-[10px] font-black text-blue-300 uppercase tracking-widest">Saldo Penarikan Dana</p>
-                    <p id="user-balance" class="text-4xl font-game font-black text-white">Rp 0</p>
-                </div>
-                <button onclick="requestWD()" class="bg-gradient-to-r from-red-600 to-red-500 px-8 py-4 rounded-2xl font-black text-[11px] uppercase shadow-lg active:scale-95 transition-all">Withdraw</button>
-            </div>
-
-            <div class="flex-1 glass rounded-[2.5rem] p-8 flex flex-col relative overflow-hidden">
-                <h2 class="text-center font-game text-xs font-black text-blue-300 mb-6 uppercase tracking-[0.3em]">Betting Arena</h2>
-                
-                <div id="nominal-grid" class="grid grid-cols-5 gap-3 mb-8"></div>
-
-                <div class="bg-black/40 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <p class="text-[9px] text-slate-500 uppercase font-black mb-1 ml-2">Target Lawan</p>
-                            <input id="target-id" type="text" placeholder="PILIH TEMAN DI KIRI" readonly class="w-full bg-transparent text-2xl font-mono text-blue-400 outline-none">
-                        </div>
-                        <button id="btn-challenge" onclick="sendChallenge()" class="bg-blue-600 hover:bg-blue-500 px-10 py-5 rounded-2xl font-black text-sm uppercase shadow-xl transition-all active:scale-95">
-                            KIRIM TANTANGAN
-                        </button>
-                    </div>
-                </div>
-
-                <div id="match-status" class="mt-6 hidden glass border-yellow-500/50 p-6 rounded-[2rem] flex flex-col items-center gap-4 animate-pulse">
-                    <p id="match-info" class="font-black text-sm uppercase text-yellow-400">Match Sedang Berlangsung...</p>
-                    <div class="flex gap-4">
-                        <button id="btn-claim-win" onclick="claimWin()" class="bg-green-600 px-8 py-3 rounded-xl font-black text-xs uppercase shadow-lg">SAYA MENANG!</button>
-                        <button id="btn-confirm-lose" onclick="confirmLose()" class="bg-slate-700 px-8 py-3 rounded-xl font-black text-xs uppercase opacity-50">KONFIRMASI KALAH</button>
-                    </div>
-                </div>
-            </div>
+        <div class="flex flex-col items-end gap-1">
+            <button onclick="event.stopPropagation(); window.location.reload();" class="bg-blue-600 text-white text-[8px] font-bold px-3 py-1 rounded mb-1">FIX BLACK SCREEN</button>
+            <button onclick="event.stopPropagation(); requestWD()" class="bg-white text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase">Withdraw</button>
         </div>
     </div>
 
-    <div id="incoming-box" class="fixed top-10 right-10 z-[100000] hidden glass border-blue-500 p-6 rounded-3xl w-80 animate-bounce shadow-2xl">
-        <p id="incoming-msg" class="text-xs font-bold mb-4"></p>
-        <div class="flex gap-2">
-            <button onclick="acceptChallenge()" class="flex-1 bg-green-600 py-3 rounded-xl font-black text-[10px] uppercase">Terima</button>
-            <button onclick="rejectChallenge()" class="flex-1 bg-red-600 py-3 rounded-xl font-black text-[10px] uppercase">Tolak</button>
+    <div class="p-4 ad-container">
+        <div class="w-full max-w-lg">
+            <div class="yt-frame shadow-2xl mb-2" id="ad-main-container">
+                <span class="text-[10px] text-gray-700">Loading Adzilla...</span>
+            </div>
+            <div class="h-1 bg-gray-800 rounded-full overflow-hidden w-full">
+                <div id="p-fill" class="progress-fill"></div>
+            </div>
+            <p class="text-center text-[9px] text-slate-500 mt-2" id="status-text">Memulai siklus anti-blokir...</p>
         </div>
+
+        <div class="ad-slot" style="width: 300px; height: 250px;" id="slot-1"></div>
+        <div class="ad-slot" style="width: 468px; height: 60px;" id="slot-2"></div>
+        <div class="ad-slot" style="width: 160px; height: 300px;" id="slot-3"></div>
+        <div class="ad-slot" style="width: 160px; height: 600px;" id="slot-4"></div>
+        <div class="ad-slot" style="width: 728px; height: 90px;" id="slot-5"></div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/90 z-[99999] hidden flex justify-center items-center p-6 backdrop-blur-md">
-        <div class="glass w-full max-w-sm rounded-[2rem] p-8 relative">
-            <button onclick="closeModal()" class="absolute top-6 right-6"><i class="fas fa-times"></i></button>
-            <h2 id="modal-title" class="font-game text-xs text-blue-300 mb-6 uppercase tracking-widest">Player List</h2>
-            <div id="modal-content" class="max-h-60 overflow-y-auto space-y-3 custom-scroll"></div>
-        </div>
-    </div>
+    <script>
+        let saldo = parseInt(localStorage.getItem('app_saldo')) || 11900;
+        const smartlinkUrl = "https://www.effectivegatecpm.com/ypk79fz44e?key=086401ebd705ad471cfebf22fb4f94f4";
+        const socialBarScript = "https://pl28606612.effectivegatecpm.com/59/b3/e8/59b3e86754e4943e8fe6f30131f537e7.js";
 
-    <div id="toast" class="fixed top-10 left-1/2 -translate-x-1/2 px-10 py-4 rounded-full text-[10px] font-black shadow-2xl hidden z-[200000] text-white"></div>
+        function openSmartlink() { window.open(smartlinkUrl, '_blank'); }
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBtWXJHlpUoIoQL7EoBJabgD95KP1kXCWM",
-            authDomain: "biliardcuan.firebaseapp.com",
-            databaseURL: "https://biliardcuan-default-rtdb.firebaseio.com",
-            projectId: "biliardcuan",
-            storageBucket: "biliardcuan.firebasestorage.app",
-            messagingSenderId: "99704420851",
-            appId: "1:99704420851:web:d3c21eaea48313c0a07a86"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-        const provider = new GoogleAuthProvider();
-
-        const nominals = [1000, 2000, 3000, 5000, 10000, 20000, 50000, 100000, 500000, 1000000];
-        let selectedNominal = 0;
-        let myUid = "";
-        let friends = JSON.parse(localStorage.getItem('billiard_friends') || '[]');
-        let activeMatch = null;
-
-        window.startApp = () => {
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-            document.getElementById('bg-music').play();
-            signInWithPopup(auth, provider);
-        };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                myUid = "ID-" + user.uid.substring(0, 4).toUpperCase();
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-game').classList.replace('hidden', 'flex');
-                
-                const userRef = ref(db, 'players/' + myUid);
-                const snap = await get(userRef);
-                if (!snap.exists()) set(userRef, { uid: myUid, name: user.displayName, photo: user.photoURL, balance: 100000 });
-
-                onValue(userRef, s => {
-                    const d = s.val();
-                    if(d) document.getElementById('user-balance').innerText = "Rp " + d.balance.toLocaleString();
-                });
-
-                // Listen Tantangan Masuk
-                onValue(ref(db, 'challenges/' + myUid), (s) => {
-                    const data = s.val();
-                    if(data) {
-                        document.getElementById('incoming-msg').innerText = `${data.senderName} Menantang Rp ${data.nominal.toLocaleString()}`;
-                        document.getElementById('incoming-box').classList.remove('hidden');
-                    } else {
-                        document.getElementById('incoming-box').classList.add('hidden');
-                    }
-                });
-
-                // Listen Match Aktif
-                onValue(ref(db, 'matches'), (s) => {
-                    const matches = s.val();
-                    activeMatch = null;
-                    document.getElementById('match-status').classList.add('hidden');
-                    
-                    if(matches) {
-                        for(let key in matches) {
-                            if(matches[key].p1 === myUid || matches[key].p2 === myUid) {
-                                activeMatch = { id: key, ...matches[key] };
-                                document.getElementById('match-status').classList.remove('hidden');
-                                document.getElementById('match-info').innerText = `Tanding vs ${activeMatch.p1 === myUid ? activeMatch.p2 : activeMatch.p1} (Rp ${activeMatch.nominal.toLocaleString()})`;
-                                
-                                // Reset tombol jika lawan sudah klaim
-                                if(activeMatch.winnerClaim && activeMatch.winnerClaim !== myUid) {
-                                    document.getElementById('btn-confirm-lose').classList.remove('opacity-50', 'bg-slate-700');
-                                    document.getElementById('btn-confirm-lose').classList.add('bg-red-600', 'animate-pulse');
-                                    document.getElementById('match-info').innerText = "LAWAN KLAIM MENANG! KONFIRMASI?";
-                                }
-                            }
-                        }
-                    }
-                });
-
-                renderNominals();
-                renderFriends();
-            }
-        });
-
-        window.sendChallenge = async () => {
-            const target = document.getElementById('target-id').value;
-            if(!target || selectedNominal <= 0) return showToast("Pilih lawan & nominal!", "bg-red-600");
-            
-            const mySnap = await get(ref(db, 'players/' + myUid));
-            if(mySnap.val().balance < selectedNominal) return showToast("Saldo kurang!", "bg-red-600");
-
-            set(ref(db, 'challenges/' + target), { senderId: myUid, senderName: auth.currentUser.displayName, nominal: selectedNominal });
-            showToast("Tantangan terkirim!", "bg-blue-600");
-        };
-
-        window.acceptChallenge = async () => {
-            const snap = await get(ref(db, 'challenges/' + myUid));
-            const data = snap.val();
-            const nom = data.nominal;
-
-            // Potong Saldo Keduanya (Escrow)
-            const p1Ref = ref(db, 'players/' + data.senderId);
-            const p2Ref = ref(db, 'players/' + myUid);
-            
-            const p1Snap = await get(p1Ref);
-            const p2Snap = await get(p2Ref);
-
-            if(p1Snap.val().balance < nom || p2Snap.val().balance < nom) {
-                showToast("Salah satu saldo tidak cukup!", "bg-red-600");
-                return remove(ref(db, 'challenges/' + myUid));
-            }
-
-            await update(p1Ref, { balance: p1Snap.val().balance - nom });
-            await update(p2Ref, { balance: p2Snap.val().balance - nom });
-
-            // Buat Match
-            const matchId = "MATCH-" + Date.now();
-            set(ref(db, 'matches/' + matchId), { p1: data.senderId, p2: myUid, nominal: nom, status: 'playing', pot: nom * 2 });
-            
-            remove(ref(db, 'challenges/' + myUid));
-            showToast("Match Dimulai! Saldo dikunci.", "bg-green-600");
-        };
-
-        window.claimWin = () => {
-            if(!activeMatch) return;
-            update(ref(db, 'matches/' + activeMatch.id), { winnerClaim: myUid });
-            showToast("Menunggu konfirmasi lawan...", "bg-blue-600");
-        };
-
-        window.confirmLose = async () => {
-            if(!activeMatch || !activeMatch.winnerClaim || activeMatch.winnerClaim === myUid) return;
-            
-            const pot = activeMatch.pot;
-            const fee = pot * 0.1; // 10% CUAN ADMIN
-            const prize = pot - fee;
-
-            // Update Pemenang
-            const winSnap = await get(ref(db, 'players/' + activeMatch.winnerClaim));
-            await update(ref(db, 'players/' + activeMatch.winnerClaim), { balance: winSnap.val().balance + prize });
-
-            // Simpan Keuntungan Admin
-            const admSnap = await get(ref(db, 'admin_profit'));
-            const currentAdm = admSnap.exists() ? admSnap.val().total : 0;
-            set(ref(db, 'admin_profit'), { total: currentAdm + fee });
-
-            // Hapus Match
-            remove(ref(db, 'matches/' + activeMatch.id));
-            
-            document.getElementById('sfx-coin').play();
-            showToast("Match selesai! Uang terkirim.", "bg-blue-600");
-        };
-
-        // UI HELPERS
-        function renderNominals() {
-            const grid = document.getElementById('nominal-grid');
-            grid.innerHTML = nominals.map(n => `
-                <div onclick="selectNom(this, ${n})" class="btn-nominal p-3 rounded-2xl flex flex-col items-center justify-center border border-white/10">
-                    <span class="text-[7px] text-blue-400 font-black uppercase">Bet</span>
-                    <span class="text-[10px] font-black">${n >= 1000000 ? '1 JT' : (n/1000)+'K'}</span>
-                </div>
-            `).join('');
+        // Fungsi khusus untuk bypass proteksi Adsterra
+        function loadAd(containerId, key, w, h) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = ''; // Clear previous
+            const ifr = document.createElement('iframe');
+            ifr.width = w;
+            ifr.height = h;
+            // Gunakan blob atau srcdoc untuk menghindari deteksi iframe standar
+            ifr.srcdoc = `<html><body style="margin:0;display:flex;justify-content:center;align-items:center;background:transparent;">
+                <script>atOptions={'key':'${key}','format':'iframe','height':${h},'width':${w},'params':{}};\x3C/script>
+                <script src="https://www.highperformanceformat.com/${key}/invoke.js"><\/script>
+            </body></html>`;
+            container.appendChild(ifr);
         }
 
-        window.selectNom = (el, n) => {
-            document.querySelectorAll('.btn-nominal').forEach(b => b.classList.remove('active'));
-            el.classList.add('active');
-            selectedNominal = n;
-            document.getElementById('sfx-click').play();
-        };
+        function refreshAll() {
+            // Main Ad
+            loadAd('ad-main-container', 'dbdbc33403cb5b88f4914ac88034303b', 320, 50);
+            
+            // Banners
+            loadAd('slot-1', 'af1659d35453444bc57653f2ae403c79', 300, 250);
+            loadAd('slot-2', '715b73e0d659246d1b505260e3e38d04', 468, 60);
+            loadAd('slot-3', 'f1f0f3268884adc93bd1992609e1e6cb', 160, 300);
+            loadAd('slot-4', 'b6e0e3259d3c47f0acad0eb4762f9d0f', 160, 600);
+            loadAd('slot-5', '13ac8d74e015acd20a946a4d57f71dd8', 728, 90);
 
-        window.showGlobalPlayers = async () => {
-            const snap = await get(ref(db, 'players'));
-            const content = document.getElementById('modal-content');
-            document.getElementById('modal').classList.remove('hidden');
-            let html = "";
-            snap.forEach(c => {
-                const p = c.val();
-                if(p.uid !== myUid) html += `
-                <div class="bg-white/5 p-4 rounded-2xl flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img src="${p.photo}" class="w-10 h-10 rounded-full">
-                        <p class="text-[11px] font-bold">${p.name}</p>
-                    </div>
-                    <button onclick="addFriend('${p.uid}','${p.name}','${p.photo}')" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black">ADD</button>
-                </div>`;
-            });
-            content.innerHTML = html;
-        };
-
-        window.addFriend = (uid, name, photo) => {
-            if(!friends.find(f => f.uid === uid)) {
-                friends.push({uid, name, photo});
-                localStorage.setItem('billiard_friends', JSON.stringify(friends));
-                renderFriends();
-            }
-            closeModal();
-        };
-
-        function renderFriends() {
-            const list = document.getElementById('friends-list');
-            list.innerHTML = friends.map(f => `
-                <div onclick="document.getElementById('target-id').value='${f.uid}'" class="bg-white/5 p-3 rounded-2xl flex items-center gap-3 hover:bg-blue-500/20 cursor-pointer mb-2 border border-transparent hover:border-blue-500/30">
-                    <img src="${f.photo}" class="w-8 h-8 rounded-full border border-blue-400">
-                    <p class="text-[10px] font-black truncate">${f.name}</p>
-                </div>
-            `).join('') || '<p class="text-center text-[9px] text-slate-600 mt-10">Belum ada teman</p>';
+            // Social Bar Stacking
+            const s = document.createElement('script');
+            s.src = socialBarScript + '?t=' + Date.now();
+            document.body.appendChild(s);
         }
 
-        window.showAdmin = async () => {
-            const pin = prompt("Admin PIN:");
-            if(pin === "1234") { // Ganti PIN sesuai keinginanmu
-                const adm = await get(ref(db, 'admin_profit'));
-                alert(`Total Cuan Admin (10%): Rp ${(adm.val() ? adm.val().total : 0).toLocaleString()}`);
-            }
+        function runCycle() {
+            const duration = Math.floor(Math.random() * (60 - 20 + 1)) + 20; 
+            const pFill = document.getElementById('p-fill');
+            
+            pFill.style.transition = 'none';
+            pFill.style.width = "0%";
+            setTimeout(() => { pFill.style.transition = `width ${duration}s linear`; pFill.style.width = "100%"; }, 50);
+            
+            refreshAll();
+            document.getElementById('status-text').innerText = `🔄 Siklus Aktif: Refresh dlm ${duration}s`;
+
+            setTimeout(() => {
+                saldo += 100;
+                localStorage.setItem('app_saldo', saldo);
+                document.getElementById('saldo').innerText = saldo.toLocaleString('id-ID');
+                runCycle();
+            }, duration * 1000);
+        }
+
+        window.onload = () => {
+            document.getElementById('saldo').innerText = saldo.toLocaleString('id-ID');
+            runCycle();
         };
 
-        window.requestWD = () => {
-            const am = prompt("Jumlah Tarik:");
-            const info = prompt("Nomor DANA:");
-            if(am && info) {
-                push(ref(db, 'withdraw_requests'), { uid: myUid, name: auth.currentUser.displayName, amount: am, info, status: 'PENDING' });
-                showToast("Request WD terkirim!", "bg-green-600");
-            }
-        };
-
-        window.showToast = (txt, cls) => {
-            const t = document.getElementById('toast');
-            t.innerText = txt;
-            t.className = `fixed top-10 left-1/2 -translate-x-1/2 px-10 py-4 rounded-full text-[10px] font-black shadow-2xl block ${cls}`;
-            setTimeout(() => t.classList.add('hidden'), 3000);
-        };
-        window.closeModal = () => document.getElementById('modal').classList.add('hidden');
-        window.copyMyId = () => { navigator.clipboard.writeText(myUid); showToast("ID Disalin!", "bg-blue-600"); };
+        function requestWD() {
+            if(saldo < 2000) return alert("Minimal Rp 2.000");
+            window.location.href = `https://wa.me/628123456789?text=WD%20Rp${saldo}`;
+        }
     </script>
 </body>
 </html>
