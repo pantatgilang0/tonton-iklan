@@ -3,92 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cuan Autopilot V2</title>
+    <title>Billiard Cuan - Online Multiplayer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f0f2f5; padding: 20px; margin: 0; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 350px; margin: auto; position: relative; z-index: 1; }
-        .balance { background: #2ecc71; color: white; padding: 15px; border-radius: 10px; margin: 20px 0; font-size: 24px; font-weight: bold; }
-        button { background: #3498db; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        button:disabled { background: #bdc3c7; cursor: not-allowed; }
-        .status { font-size: 12px; color: #7f8c8d; margin-top: 15px; }
-
-        /* Overlay Iklan */
-        #iklan-layar {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; color: white; z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
-        }
-        #timer-box { font-size: 60px; font-weight: bold; color: #2ecc71; }
-        #btn-tutup {
-            display: none; position: absolute; top: 20px; right: 20px;
-            background: red; color: white; border: none; padding: 10px 18px;
-            border-radius: 50%; font-size: 20px; font-weight: bold; cursor: pointer;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@400;700;900&display=swap');
+        .font-game { font-family: 'Black Ops One', cursive; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; }
     </style>
-
-    <script src="https://pl28606612.effectivegatecpm.com/59/b3/e8/59b3e86754e4943e8fe6f30131f537e7.js"></script>
 </head>
-<body>
+<body class="text-white min-h-screen">
 
-    <div class="card">
-        <h2>Cuan Autopilot</h2>
-        <div class="balance">Rp <span id="saldo">0</span></div>
-        <button id="btn-klaim" onclick="jalankanProses()">PUTAR IKLAN OTOMATIS</button>
-        <div class="status">Sistem ID: PANTATGILANG0-OFFICIAL</div>
-    </div>
-
-    <div id="iklan-layar">
-        <button id="btn-tutup" onclick="tutupIklan()">X</button>
-        <h3>Iklan Sedang Berjalan...</h3>
-        <div id="timer-box">45</div>
-        <p>Jangan keluar dari aplikasi</p>
-    </div>
-
-    <script>
-        let saldo = parseInt(localStorage.getItem('saldo_user')) || 0;
-        document.getElementById('saldo').innerText = saldo.toLocaleString();
+    <div id="login-screen" class="max-w-md mx-auto h-screen flex flex-col justify-center items-center p-6 text-center">
+        <div class="mb-10">
+            <div class="relative inline-block">
+                <i class="fas fa-8-ball text-8xl text-yellow-500 mb-4 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]"></i>
+            </div>
+            <h1 class="text-4xl font-game tracking-wider text-white">BILLIARD <span class="text-yellow-500">CUAN</span></h1>
+            <p class="text-slate-400 mt-2">Login untuk mulai taruhan & kumpulkan saldo!</p>
+        </div>
         
-        let detik = 45;
-        let timer;
+        <button onclick="loginGoogle()" class="w-full bg-white text-slate-900 font-bold py-4 rounded-2xl flex items-center justify-center gap-3 shadow-xl hover:bg-slate-100 transition-all active:scale-95">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa-lightbox/google.svg" class="w-6">
+            Masuk dengan Google
+        </button>
+    </div>
 
-        function jalankanProses() {
-            // 1. Munculkan Layar Hitam (Iklan)
-            document.getElementById('iklan-layar').style.display = 'flex';
-            document.getElementById('btn-klaim').disabled = true;
-            document.getElementById('btn-tutup').style.display = 'none';
-            detik = 45;
-            document.getElementById('timer-box').innerText = detik;
+    <div id="main-game" class="max-w-md mx-auto p-6 hidden">
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 border border-slate-700 shadow-2xl mb-6 relative overflow-hidden">
+            <div class="flex items-center gap-4 mb-6">
+                <img id="user-photo" src="" class="w-16 h-16 rounded-full border-2 border-yellow-500 shadow-lg">
+                <div>
+                    <p id="user-name" class="font-black text-xl leading-none">Memuat...</p>
+                    <p id="user-id" class="text-[10px] font-mono text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded mt-2 inline-block">ID: --</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Saldo Anda</p>
+                    <p id="user-balance" class="text-xl font-black text-green-400">Rp 0</p>
+                </div>
+                <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-700">
+                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Total Win</p>
+                    <p id="user-wins" class="text-xl font-black text-blue-400">0</p>
+                </div>
+            </div>
+        </div>
 
-            // 2. Buka Direct Link Iklan (Skrip Lama)
-            const link = 'https://www.effectivegatecpm.com/sxy78czxp?key=ecbe68cdf04e2a8a22c5f0f6403f198c';
-            window.open(link, '_blank');
+        <div class="bg-slate-800 rounded-3xl p-6 border border-slate-700 shadow-xl mb-6">
+            <h2 class="font-black mb-4 flex items-center gap-2 text-yellow-500 uppercase tracking-wider">
+                <i class="fas fa-bolt"></i> Tantang Lawan
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] text-slate-500 ml-1 uppercase font-bold">Masukkan ID Lawan</label>
+                    <input id="target-id" type="text" placeholder="Contoh: ID-A1B2" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl focus:border-yellow-500 outline-none transition-all uppercase font-mono">
+                </div>
+                <div>
+                    <label class="text-[10px] text-slate-500 ml-1 uppercase font-bold">Jumlah Taruhan</label>
+                    <input id="bet-val" type="number" placeholder="Rp" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl focus:border-green-500 outline-none transition-all font-bold text-green-400">
+                </div>
+                <button onclick="claimWin()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black py-5 rounded-2xl shadow-lg shadow-yellow-500/20 active:scale-95 transition-all uppercase tracking-widest">
+                    SAYA MENANG!
+                </button>
+            </div>
+        </div>
 
-            // 3. Jalankan Hitung Mundur
-            timer = setInterval(function() {
-                detik--;
-                document.getElementById('timer-box').innerText = detik;
+        <button onclick="logout()" class="w-full text-slate-600 text-[10px] font-bold uppercase tracking-widest hover:text-red-500 transition-colors">
+            <i class="fas fa-sign-out-alt"></i> Keluar Akun
+        </button>
+    </div>
 
-                if (detik <= 0) {
-                    clearInterval(timer);
-                    document.getElementById('timer-box').innerText = "DONE";
-                    // Tampilkan tombol X agar Robot Auto.js bisa klik
-                    document.getElementById('btn-tutup').style.display = 'block';
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl text-sm font-black shadow-2xl hidden z-50 animate-bounce"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtWXJHlpUoIoQL7EoBJabgD95KP1kXCWM",
+            authDomain: "biliardcuan.firebaseapp.com",
+            databaseURL: "https://biliardcuan-default-rtdb.firebaseio.com",
+            projectId: "biliardcuan",
+            storageBucket: "biliardcuan.firebasestorage.app",
+            messagingSenderId: "99704420851",
+            appId: "1:99704420851:web:d3c21eaea48313c0a07a86"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+
+        window.loginGoogle = () => {
+            signInWithPopup(auth, provider).catch(err => alert("Error: " + err.message));
+        };
+
+        window.logout = () => {
+            if(confirm("Yakin mau keluar?")) signOut(auth).then(() => location.reload());
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-game').classList.remove('hidden');
+
+                const myUid = "ID-" + user.uid.substring(0, 4).toUpperCase();
+                const userRef = ref(db, 'players/' + myUid);
+                
+                const snap = await get(userRef);
+                if (!snap.exists()) {
+                    await set(userRef, {
+                        uid: myUid,
+                        name: user.displayName,
+                        photo: user.photoURL,
+                        balance: 100000, 
+                        wins: 0
+                    });
                 }
-            }, 1000);
+
+                document.getElementById('user-name').innerText = user.displayName;
+                document.getElementById('user-photo').src = user.photoURL;
+                document.getElementById('user-id').innerText = "ID: " + myUid;
+
+                onValue(userRef, (s) => {
+                    const d = s.val();
+                    if(d) {
+                        document.getElementById('user-balance').innerText = "Rp " + d.balance.toLocaleString();
+                        document.getElementById('user-wins').innerText = d.wins;
+                    }
+                });
+            }
+        });
+
+        window.claimWin = async () => {
+            const oppId = document.getElementById('target-id').value.trim().toUpperCase();
+            const bet = parseInt(document.getElementById('bet-val').value);
+            const myUid = "ID-" + auth.currentUser.uid.substring(0, 4).toUpperCase();
+
+            if (!oppId || isNaN(bet) || bet <= 0) return showToast("MASUKKAN DATA DENGAN BENAR!", "bg-red-600");
+            if (oppId === myUid) return showToast("NGGAK BISA LAWAN DIRI SENDIRI!", "bg-red-600");
+
+            const oppRef = ref(db, 'players/' + oppId);
+            const oppSnap = await get(oppRef);
+
+            if (!oppSnap.exists()) return showToast("ID LAWAN TIDAK DITEMUKAN!", "bg-red-600 text-white");
+            
+            const oppData = oppSnap.val();
+            if (oppData.balance < bet) return showToast(`SALDO ${oppData.name} TIDAK CUKUP!`, "bg-orange-600");
+
+            try {
+                // Potong saldo lawan
+                await update(oppRef, { balance: oppData.balance - bet });
+                
+                // Tambah saldo kita
+                const myRef = ref(db, 'players/' + myUid);
+                const mySnap = await get(myRef);
+                await update(myRef, { 
+                    balance: mySnap.val().balance + bet,
+                    wins: mySnap.val().wins + 1
+                });
+
+                showToast(`JACKPOT! +Rp ${bet.toLocaleString()}`, "bg-green-600 text-white");
+                document.getElementById('target-id').value = "";
+                document.getElementById('bet-val').value = "";
+            } catch (e) {
+                showToast("KONEKSI BERMASALAH!", "bg-red-600");
+            }
+        };
+
+        function showToast(txt, cls) {
+            const t = document.getElementById('toast');
+            t.innerText = txt;
+            t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl text-sm font-black shadow-2xl z-50 block ${cls}`;
+            setTimeout(() => t.classList.add('hidden'), 3000);
         }
-
-        function tutupIklan() {
-            // Tambah Saldo
-            saldo += 500;
-            localStorage.setItem('saldo_user', saldo);
-            document.getElementById('saldo').innerText = saldo.toLocaleString();
-
-            // Reset Tampilan
-            document.getElementById('iklan-layar').style.display = 'none';
-            document.getElementById('btn-klaim').disabled = false;
-        }
-
-        // Auto Pilot: Jika ingin otomatis klik sendiri tanpa robot tiap 60 detik
-        // setInterval(jalankanProses, 60000);
     </script>
 </body>
 </html>
